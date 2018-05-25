@@ -145,7 +145,7 @@ public class RegistrationController {
             return openRegistrationForm(request, model);
         }
 
-        String code = "";
+        String code;
         boolean registered = registration.registered(player.getName());
         boolean approved = registration.approved(player.getName());
         ServletRequestAttributes attr = (ServletRequestAttributes)

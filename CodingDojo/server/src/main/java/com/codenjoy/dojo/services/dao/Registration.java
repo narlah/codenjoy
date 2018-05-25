@@ -153,6 +153,38 @@ public class Registration {
         );
     }
 
+    public String getJSessionId(final String email) {
+        return pool.select("SELECT jsessionID FROM users WHERE email = ?;",
+                new Object[]{email},
+                new ObjectMapper<String>() {
+                    @Override
+                    public String mapFor(ResultSet resultSet) throws SQLException {
+                        if (resultSet.next()) {
+                            return resultSet.getString("jsessionID");
+                        } else {
+                            return null;
+                        }
+                    }
+                }
+        );
+    }
+
+    public String getJSessionIdByCode(final String code) {
+        return pool.select("SELECT jsessionID FROM users WHERE code = ?;",
+                new Object[]{code},
+                new ObjectMapper<String>() {
+                    @Override
+                    public String mapFor(ResultSet resultSet) throws SQLException {
+                        if (resultSet.next()) {
+                            return resultSet.getString("jsessionID");
+                        } else {
+                            return null;
+                        }
+                    }
+                }
+        );
+    }
+
     public void approve(final String code) {
         pool.update("UPDATE users SET email_approved = ? WHERE code = ?;",
                 new Object[] {1, code});
@@ -164,12 +196,13 @@ public class Registration {
     }
 
     class User {
-        public User(String email, int email_approved, String password, String code, String data) {
+        public User(String email, int email_approved, String password, String code, String data, String jsessionID) {
             this.email = email;
             this.email_approved = email_approved;
             this.password = password;
             this.code = code;
             this.data = data;
+            this.jsessionID = jsessionID;
         }
 
         String email;
@@ -177,6 +210,7 @@ public class Registration {
         String password;
         String code;
         String data;
+        String jsessionID;
 
         @Override
         public String toString() {
@@ -186,6 +220,7 @@ public class Registration {
                     ", password='" + password + '\'' +
                     ", code='" + code + '\'' +
                     ", data='" + data + '\'' +
+                    ", jsessionID='" + jsessionID + '\'' +
                     '}';
         }
     }
@@ -210,7 +245,9 @@ public class Registration {
                                         resultSet.getInt("email_approved"),
                                         resultSet.getString("password"),
                                         resultSet.getString("code"),
-                                        resultSet.getString("data")));
+                                        resultSet.getString("data"),
+                                        resultSet.getString("jsessionID")
+                                        ));
                             }
                             return result;
                         }

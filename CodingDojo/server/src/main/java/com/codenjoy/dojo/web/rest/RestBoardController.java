@@ -164,7 +164,7 @@ public class RestBoardController {
         String existingPlayerCode = registration.getCode(existingPlayer.getName());
         if (player.getCode() == null ||
                 !existingPlayer.getName().equals(player.getName()) ||
-                !player.getCode().equals(existingPlayerCode)) {
+                !player.getjSessionID().equals(registration.getJSessionIdByCode(player.getCode()))) {
             return "error";
         }
         CodeSaver.save(player.getName(), new Date().getTime(), player.getData());
