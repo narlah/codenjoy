@@ -10,12 +10,12 @@ package com.codenjoy.dojo.services.mail;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -23,6 +23,8 @@ package com.codenjoy.dojo.services.mail;
  */
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -36,6 +38,8 @@ import java.util.Properties;
 @Component
 public class MailService {
 
+    private final Logger logger = LoggerFactory.getLogger(MailService.class);
+
     @Value("${email.password}")
     private String emailPassword;
 
@@ -44,12 +48,13 @@ public class MailService {
 
     public void sendEmail(String to, String title, String body) throws MessagingException {
         if (StringUtils.isEmpty(emailName)) {
+            logger.info(">>> empty....");
             return;
         }
-        //String port = "578";
         String port = "465";
 
         Properties props = System.getProperties();
+
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.host", "smtp.gmail.com");
@@ -59,30 +64,29 @@ public class MailService {
         //props.put("mail.debug", "true");
         props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         props.put("mail.smtp.socketFactory.fallback", "false");
-        //        props.put("mail.transport.protocol", "smtps");
-//
-//        props.put("mail.smtp.host", "smtp.gmail.com");
-//        //props.put("mail.smtp.host", "gc2.nodecluster.net");
-////        props.put("mail.smtp.host", "mail.codenjoy.com");
-////        props.put("mail.smtp.port", "26");
-//        props.put("mail.smtp.port", port);
-//        props.put("mail.smtp.auth", "true");
-//        props.put("mail.smtp.ssl.enable", "true");
-//        //props.setProperty("mail.smtp.ssl.trust", "gc2.nodecluster.net");
-//        props.setProperty("mail.smtp.ssl.trust", "smtp.gmail.com");
-//        props.put("mail.smtp.user", emailName);
-//        props.put("mail.smtp.starttls.enable", "true");
-//        props.put("mail.smtp.EnableSSL.enable", "true");
-//        props.put("mail.debug", "true");
-//        props.put("mail.password", emailPassword);
-//        props.put("mail.user", emailName);
-//        props.put("mail.from", emailName);
-//        props.put("mail.smtp.localhost", "codenjoy.com");
-//        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-//        props.put("mail.smtp.socketFactory.fallback", "false");
-//        props.put("mail.smtp.port", port);
-//        props.put("mail.smtp.socketFactory.port", port);
 
+       /* props.put("mail.transport.protocol", "smtps");
+        props.put("mail.smtp.host", "gc2.nodecluster.net");
+//        props.put("mail.smtp.host", "mail.codenjoy.com");
+//        props.put("mail.smtp.port", "26");
+        props.put("mail.smtp.port", port);
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.ssl.enable", "true");
+        props.setProperty("mail.smtp.ssl.trust", "gc2.nodecluster.net");
+        props.put("mail.smtp.user", emailName);
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.EnableSSL.enable", "true");
+        props.put("mail.debug", "true");
+        props.put("mail.password", emailPassword);
+        props.put("mail.user", emailName);
+        props.put("mail.from", emailName);
+        props.put("mail.smtp.localhost", "codenjoy.com");
+        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        props.put("mail.smtp.socketFactory.fallback", "false");
+        props.put("mail.smtp.port", port);
+        props.put("mail.smtp.socketFactory.port", port); */
+
+        logger.info(">>> before session.....");
         // Get the default Session object.
         Session session = Session.getInstance(props, new Authenticator() {
             public PasswordAuthentication getPasswordAuthentication() {
@@ -99,7 +103,7 @@ public class MailService {
         Transport transport = session.getTransport("smtps");
         transport.send(message);
         transport.close();
-        System.out.println("mail sent");
+        logger.info(">>> msg sent!!!");
     }
 
 
