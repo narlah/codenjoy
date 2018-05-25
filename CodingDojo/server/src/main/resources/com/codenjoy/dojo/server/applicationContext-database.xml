@@ -49,6 +49,15 @@
           class="com.codenjoy.dojo.services.jdbc.SqliteConnectionThreadPoolFactory">
         <constructor-arg value="database/users.db"/>
     </bean>
+
+    <bean id="hackathonRegistration" class="com.codenjoy.dojo.services.dao.HackathonRegistration">
+        <constructor-arg ref="registrationPoolFactory"/>
+    </bean>
+
+    <bean id="codeForReward" class="com.codenjoy.dojo.services.dao.CodeForReward">
+        <constructor-arg ref="registrationPoolFactory"/>
+    </bean>
+
     <bean id="registration" class="com.codenjoy.dojo.services.dao.Registration">
         <constructor-arg ref="registrationPoolFactory"/>
     </bean>

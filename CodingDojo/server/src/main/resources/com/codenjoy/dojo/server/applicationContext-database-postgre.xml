@@ -42,6 +42,10 @@
         <constructor-arg ref="connectionThreadPollFactory"/>
     </bean>
 
+    <bean id="hackathonRegistration" class="com.codenjoy.dojo.services.dao.HackathonRegistration">
+        <constructor-arg ref="connectionThreadPollFactory"/>
+    </bean>
+
     <bean id="registration" class="com.codenjoy.dojo.services.dao.Registration">
         <constructor-arg ref="connectionThreadPollFactory"/>
     </bean>

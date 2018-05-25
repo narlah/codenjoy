@@ -10,12 +10,12 @@ package com.codenjoy.dojo.web.rest;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -77,6 +77,8 @@ public class RestBoardController {
     @ResponseBody
     public String getContext() {
         String contextPath = servletContext.getContextPath();
+        //if (contextPath.charAt(contextPath.length() - 1) != '/') {
+        //            contextPath += '/';
         if (contextPath.charAt(contextPath.length() - 1) == '/') {
             contextPath += contextPath.substring(0, contextPath.length() - 1);
         }
@@ -151,4 +153,21 @@ public class RestBoardController {
         return "ok";
     }
 
+
+    @RequestMapping(value = "/persistData", method = RequestMethod.POST)
+    @ResponseBody
+    public String persistData(Player player){
+        Player existingPlayer = playerService.get(player.getName());
+        if (existingPlayer == NullPlayer.INSTANCE) {
+            return "error";
+        }
+        String existingPlayerCode = registration.getCode(existingPlayer.getName());
+        if (player.getCode() == null ||
+                !existingPlayer.getName().equals(player.getName()) ||
+                !player.getCode().equals(existingPlayerCode)) {
+            return "error";
+        }
+        CodeSaver.save(player.getName(), new Date().getTime(), player.getData());
+        return "ok";
+    }
 }
