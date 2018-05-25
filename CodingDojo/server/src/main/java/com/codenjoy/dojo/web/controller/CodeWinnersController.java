@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -52,34 +53,35 @@ public class CodeWinnersController {
 
     @RequestMapping(method = RequestMethod.GET)
     public @ResponseBody
-    String isRegistered(HttpServletRequest _request, @RequestParam("email") String contact_email, @RequestParam("jsessionID") String jsessionID) {
-        if (registration.getJSessionId(contact_email).equals(jsessionID)) {
-            String hasCode = codeForReward.getCode(contact_email);
+    String isRegistered(HttpServletRequest _request, @RequestParam("jsessionID") String jsessionID) {
+        Registration.User user = registration.getUser(jsessionID);
+        if (user != null && user.getJsessionID().equals(jsessionID)) {
+            String hasCode = codeForReward.getCode(user.getEmail());
             if (!hasCode.equals("false")) {
                 return "{\"alreadyHasCode\":" + "\"true\", " +
                         "\"code\":" + "\"" + hasCode + "\" " +
                         "}";
             } else {
-                String newCode = codeForReward.insertCode(contact_email);
-                sendEmailForCode(contact_email, newCode);
+                String newCode = codeForReward.insertCode(user.getEmail());
+                sendEmailForCode(user.getEmail(), newCode);
                 return "{\"alreadyHasCode\":" + "\"false\", " +
                         "\"code\":" + "\"" + newCode + "\" " +
                         "}";
 
             }
         }
-        return "{\"invalidJSessionId\":" + "\"" + jsessionID + "\", " +
-                "\"email\":" + "\"" + contact_email + "\" " +
-                "}";
+        return "{\"invalidJSessionId\":" + "\"" + jsessionID + "\" }";
     }
 
-    @RequestMapping(params = "resendEmail", method = RequestMethod.GET)
+    @RequestMapping(value = "/resend", method = RequestMethod.GET)
     public @ResponseBody
-    String resendEmail(HttpServletRequest _request, @RequestParam("resendEmail") String contact_email, @RequestParam("jsessionID") String jsessionID) {
-        if (registration.getJSessionId(contact_email).equals(jsessionID)) {
-            String code = codeForReward.getCode(contact_email);
+    String resendEmail(@RequestParam("jsessionID") String jsessionID) {
+        Registration.User user = registration.getUser(jsessionID);
+        if (user != null && user.getJsessionID().equals(jsessionID)) {
+
+            String code = codeForReward.getCode(user.getEmail());
             if (!code.equals("true")) {
-                sendEmailForCode(contact_email, code);
+                sendEmailForCode(user.getEmail(), code);
                 return "{\"mailSent\":" + "\"true\", " +
                         "\"code\":" + "\"" + code + "\" " +
                         "}";
@@ -89,9 +91,7 @@ public class CodeWinnersController {
                     "\"reason\":" + "\"no_code\" " +
                     "}";
         } else {
-            return "{\"invalidJSessionId\":" + "\"" + jsessionID + "\", " +
-                    "\"email\":" + "\"" + contact_email + "\" " +
-                    "}";
+            return "{\"invalidJSessionId\":" + "\"" + jsessionID + "\"}";
         }
     }
 
@@ -110,9 +110,13 @@ public class CodeWinnersController {
     }
 
 
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(value = "/all", method = RequestMethod.GET)
     public @ResponseBody
-    List<CodeReward> all() {
-        return codeForReward.getAll();
+    List<CodeReward> all(@RequestParam("jsessionID") String jsessionID) {
+        Registration.User user = registration.getUser(jsessionID);
+        if (user != null && registration.getJSessionId(user.getJsessionID()).equals(jsessionID)) {
+            return codeForReward.getAll();
+        } else
+            return Collections.emptyList();
     }
 }

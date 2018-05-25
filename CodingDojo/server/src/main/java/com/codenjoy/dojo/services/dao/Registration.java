@@ -10,12 +10,12 @@ package com.codenjoy.dojo.services.dao;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -187,15 +187,23 @@ public class Registration {
 
     public void approve(final String code) {
         pool.update("UPDATE users SET email_approved = ? WHERE code = ?;",
-                new Object[] {1, code});
+                new Object[]{1, code});
     }
 
     public void setSessionId(String jssionId, String code) {
         pool.update("UPDATE users SET jsessionID = ? WHERE code = ?;",
-                new Object[] {jssionId, code});
+                new Object[]{jssionId, code});
     }
 
-    class User {
+    public class User {
+        String email;
+        int email_approved;
+        String password;
+        String code;
+        String data;
+        String jsessionID;
+
+
         public User(String email, int email_approved, String password, String code, String data, String jsessionID) {
             this.email = email;
             this.email_approved = email_approved;
@@ -205,12 +213,53 @@ public class Registration {
             this.jsessionID = jsessionID;
         }
 
-        String email;
-        int email_approved;
-        String password;
-        String code;
-        String data;
-        String jsessionID;
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public int getEmail_approved() {
+            return email_approved;
+        }
+
+        public void setEmail_approved(int email_approved) {
+            this.email_approved = email_approved;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public void setCode(String code) {
+            this.code = code;
+        }
+
+        public String getData() {
+            return data;
+        }
+
+        public void setData(String data) {
+            this.data = data;
+        }
+
+        public String getJsessionID() {
+            return jsessionID;
+        }
+
+        public void setJsessionID(String jsessionID) {
+            this.jsessionID = jsessionID;
+        }
 
         @Override
         public String toString() {
@@ -223,6 +272,7 @@ public class Registration {
                     ", jsessionID='" + jsessionID + '\'' +
                     '}';
         }
+
     }
 
     public void changePasswordsToMD5() {
@@ -236,22 +286,44 @@ public class Registration {
 
     public List<User> getUsers() {
         return pool.select("SELECT * FROM users;",
-                    new ObjectMapper<List<User>>() {
-                        @Override
-                        public List<User> mapFor(ResultSet resultSet) throws SQLException {
-                            List<User> result = new LinkedList<User>();
-                            while (resultSet.next()) {
-                                result.add(new User(resultSet.getString("email"),
-                                        resultSet.getInt("email_approved"),
-                                        resultSet.getString("password"),
-                                        resultSet.getString("code"),
-                                        resultSet.getString("data"),
-                                        resultSet.getString("jsessionID")
-                                        ));
-                            }
-                            return result;
+                new ObjectMapper<List<User>>() {
+                    @Override
+                    public List<User> mapFor(ResultSet resultSet) throws SQLException {
+                        List<User> result = new LinkedList<User>();
+                        while (resultSet.next()) {
+                            result.add(new User(resultSet.getString("email"),
+                                    resultSet.getInt("email_approved"),
+                                    resultSet.getString("password"),
+                                    resultSet.getString("code"),
+                                    resultSet.getString("data"),
+                                    resultSet.getString("jsessionID")
+                            ));
                         }
+                        return result;
                     }
-            );
+                }
+        );
+    }
+
+    public User getUser(final String jSessionID) {
+        return pool.select("SELECT * FROM users WHERE jsessionID = ?;",
+                new Object[]{jSessionID},
+                new ObjectMapper<User>() {
+                    @Override
+                    public User mapFor(ResultSet resultSet) throws SQLException {
+
+                        if (resultSet.next()) {
+                            return new User(resultSet.getString("email"),
+                                    resultSet.getInt("email_approved"),
+                                    resultSet.getString("password"),
+                                    resultSet.getString("code"),
+                                    resultSet.getString("data"),
+                                    resultSet.getString("jsessionID")
+                            );
+                        }
+                        return null;
+                    }
+                }
+        );
     }
 }

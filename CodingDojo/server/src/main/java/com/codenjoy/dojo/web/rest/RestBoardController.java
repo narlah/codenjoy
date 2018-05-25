@@ -161,10 +161,10 @@ public class RestBoardController {
         if (existingPlayer == NullPlayer.INSTANCE) {
             return "error";
         }
-        String existingPlayerCode = registration.getCode(existingPlayer.getName());
-        if (player.getCode() == null ||
-                !existingPlayer.getName().equals(player.getName()) ||
-                !player.getjSessionID().equals(registration.getJSessionIdByCode(player.getCode()))) {
+        Registration.User user= registration.getUser(player.getjSessionID());
+        if (user!= null &&
+                (!existingPlayer.getName().equals(player.getName()) ||
+                !player.getjSessionID().equals(user.getJsessionID()))) {
             return "error";
         }
         CodeSaver.save(player.getName(), new Date().getTime(), player.getData());
