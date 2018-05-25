@@ -157,8 +157,11 @@ public class RegistrationController {
         String jessionId = getGlobalSessionID();
 
         if (registered && approved) {
-            model.addAttribute("message", "Already Registered!");
-            return openRegistrationForm(request, model);
+            //TEMPORARY TODO REMOVE AFTER
+            return "redirect:/" + register(player.getName(), player.getCode(),
+                    player.getGameName(), request.getRemoteAddr());
+            //model.addAttribute("message", "Already Registered!");
+            //return openRegistrationForm(request, model);
         } else {
             if (!registered) {
                 code = registration.register(player.getName(), player.getPassword(), player.getData());

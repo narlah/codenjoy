@@ -98,7 +98,7 @@ public class CodeWinnersController {
     private void sendEmailForCode(String contact_email, String code) {
         try {
             //String email = "Maria_Zharova@epam.com";
-            String email = "mitrandir@gmail.com";
+            String email = "testrpa0@gmail.com";
             mailService.sendEmail(email, "Codenjoy winner",
                     "You got rewarded \n Pass by our boot to receive your reward : \n Email " +
                             "\n email: " + contact_email +
