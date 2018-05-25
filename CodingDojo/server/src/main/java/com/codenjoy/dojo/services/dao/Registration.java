@@ -46,7 +46,8 @@ public class Registration {
                         "email_approved int, " +
                         "password varchar(255)," +
                         "code varchar(255)," +
-                        "data varchar(255));");
+                        "data varchar(255)," +
+                        "jsessionID varchar(255));");
     }
 
     void removeDatabase() {
@@ -155,6 +156,11 @@ public class Registration {
     public void approve(final String code) {
         pool.update("UPDATE users SET email_approved = ? WHERE code = ?;",
                 new Object[] {1, code});
+    }
+
+    public void setSessionId(String jssionId, String code) {
+        pool.update("UPDATE users SET jsessionID = ? WHERE code = ?;",
+                new Object[] {jssionId, code});
     }
 
     class User {

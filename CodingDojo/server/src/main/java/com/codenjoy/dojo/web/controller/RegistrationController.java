@@ -37,9 +37,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.Map;
 
 @Controller
@@ -145,6 +148,11 @@ public class RegistrationController {
         String code = "";
         boolean registered = registration.registered(player.getName());
         boolean approved = registration.approved(player.getName());
+        ServletRequestAttributes attr = (ServletRequestAttributes)
+                RequestContextHolder.currentRequestAttributes();
+        HttpSession session= attr.getRequest().getSession(true);
+        String jessionId = session.getId(); //TODO ? maybe it is this thing
+
         if (registered && approved) {
             code = registration.login(player.getName(), player.getPassword());
             if (code == null) {
@@ -192,7 +200,7 @@ public class RegistrationController {
             }
         }
         player.setCode(code);
-
+        registration.setSessionId(jessionId, code);
         if (approved) {
             return "redirect:/" + register(player.getName(), player.getCode(),
                             player.getGameName(), request.getRemoteAddr());
