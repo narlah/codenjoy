@@ -23,6 +23,7 @@ package com.codenjoy.dojo.web.controller;
 
 import com.codenjoy.dojo.services.dao.CodeForReward;
 import com.codenjoy.dojo.services.dao.CodeReward;
+import com.codenjoy.dojo.services.dao.Registration;
 import com.codenjoy.dojo.services.mail.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -43,47 +45,60 @@ public class CodeWinnersController {
     private CodeForReward codeForReward;
 
     @Autowired
+    private Registration registration;
+
+    @Autowired
     private MailService mailService;
 
 
-    @RequestMapping(params = "hasCode", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public @ResponseBody
-    String isRegistered(HttpServletRequest _request, @RequestParam("hasCode") String contact_email) {
-        String hasCode = codeForReward.getCode(contact_email);
-        if (!hasCode.equals("false")) {
-            return "{\"alreadyHasCode\":" + "\"true\", " +
-                    "\"code\":" + "\"" + hasCode + "\" " +
-                    "}";
-        } else {
-            String newCode = codeForReward.insertCode(contact_email);
-            sendEmailForCode(contact_email, newCode);
-            return "{\"alreadyHasCode\":" + "\"false\", " +
-                    "\"code\":" + "\"" + newCode + "\" " +
-                    "}";
+    String isRegistered(HttpServletRequest _request, @RequestParam("jsessionID") String jsessionID) {
+        Registration.User user = registration.getUser(jsessionID);
+        if (user != null && user.getJsessionID().equals(jsessionID)) {
+            String hasCode = codeForReward.getCode(user.getEmail());
+            if (!hasCode.equals("false")) {
+                return "{\"alreadyHasCode\":" + "\"true\", " +
+                        "\"code\":" + "\"" + hasCode + "\" " +
+                        "}";
+            } else {
+                String newCode = codeForReward.insertCode(user.getEmail());
+                sendEmailForCode(user.getEmail(), newCode);
+                return "{\"alreadyHasCode\":" + "\"false\", " +
+                        "\"code\":" + "\"" + newCode + "\" " +
+                        "}";
 
+            }
         }
+        return "{\"invalidJSessionId\":" + "\"" + jsessionID + "\" }";
     }
 
-    @RequestMapping(params = "resendEmail", method = RequestMethod.GET)
+    @RequestMapping(value = "/resend", method = RequestMethod.GET)
     public @ResponseBody
-    String resendEmail(HttpServletRequest _request, @RequestParam("resendEmail") String contact_email) {
-        String code = codeForReward.getCode(contact_email);
-        if (!code.equals("true")) {
-            sendEmailForCode(contact_email, code);
-            return "{\"mailSent\":" + "\"true\", " +
-                    "\"code\":" + "\"" + code + "\" " +
-                    "}";
+    String resendEmail(@RequestParam("jsessionID") String jsessionID) {
+        Registration.User user = registration.getUser(jsessionID);
+        if (user != null && user.getJsessionID().equals(jsessionID)) {
 
+            String code = codeForReward.getCode(user.getEmail());
+            if (!code.equals("true")) {
+                sendEmailForCode(user.getEmail(), code);
+                return "{\"mailSent\":" + "\"true\", " +
+                        "\"code\":" + "\"" + code + "\" " +
+                        "}";
+
+            }
+            return "{\"mailSent\":" + "\"false\", " +
+                    "\"reason\":" + "\"no_code\" " +
+                    "}";
+        } else {
+            return "{\"invalidJSessionId\":" + "\"" + jsessionID + "\"}";
         }
-        return "{\"mailSent\":" + "\"false\", " +
-                "\"reason\":" + "\"no_code\" " +
-                "}";
     }
 
     private void sendEmailForCode(String contact_email, String code) {
         try {
             //String email = "Maria_Zharova@epam.com";
-            String email = "mitrandir@gmail.com";
+            String email = "testrpa0@gmail.com";
             mailService.sendEmail(email, "Codenjoy winner",
                     "You got rewarded \n Pass by our boot to receive your reward : \n Email " +
                             "\n email: " + contact_email +
@@ -95,9 +110,13 @@ public class CodeWinnersController {
     }
 
 
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(value = "/all", method = RequestMethod.GET)
     public @ResponseBody
-    List<CodeReward> all() {
-        return codeForReward.getAll();
+    List<CodeReward> all(@RequestParam("jsessionID") String jsessionID) {
+        Registration.User user = registration.getUser(jsessionID);
+        if (user != null && registration.getJSessionId(user.getJsessionID()).equals(jsessionID)) {
+            return codeForReward.getAll();
+        } else
+            return Collections.emptyList();
     }
 }
