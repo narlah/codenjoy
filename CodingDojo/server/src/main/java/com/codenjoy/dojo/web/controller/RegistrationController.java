@@ -10,12 +10,12 @@ package com.codenjoy.dojo.web.controller;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -49,11 +49,16 @@ import java.util.Map;
 @RequestMapping("/register")
 public class RegistrationController {
 
-    @Autowired private PlayerService playerService;
-    @Autowired private Registration registration;
-    @Autowired private GameService gameService;
-    @Autowired private MailService mailService;
-    @Autowired private LinkService linkService;
+    @Autowired
+    private PlayerService playerService;
+    @Autowired
+    private Registration registration;
+    @Autowired
+    private GameService gameService;
+    @Autowired
+    private MailService mailService;
+    @Autowired
+    private LinkService linkService;
 
     @Value("${email.verification}")
     private boolean isEmailVerificationNeeded;
@@ -119,7 +124,8 @@ public class RegistrationController {
     }
 
     @RequestMapping(params = "approved", method = RequestMethod.GET)
-    public @ResponseBody String isEmailApproved(@RequestParam("approved") String email) throws InterruptedException {
+    public @ResponseBody
+    String isEmailApproved(@RequestParam("approved") String email) throws InterruptedException {
         while (!registration.approved(email)) {
             Thread.sleep(2000);
         }
@@ -148,18 +154,11 @@ public class RegistrationController {
         String code;
         boolean registered = registration.registered(player.getName());
         boolean approved = registration.approved(player.getName());
-        ServletRequestAttributes attr = (ServletRequestAttributes)
-                RequestContextHolder.currentRequestAttributes();
-        HttpSession session= attr.getRequest().getSession(true);
-        String jessionId = session.getId(); //TODO ? maybe it is this thing
+        String jessionId = getGlobalSessionID();
 
         if (registered && approved) {
-            code = registration.login(player.getName(), player.getPassword());
-            if (code == null) {
-                model.addAttribute("bad_pass", true);
-
-                return openRegistrationForm(request, model);
-            }
+            model.addAttribute("message", "Already Registered!");
+            return openRegistrationForm(request, model);
         } else {
             if (!registered) {
                 code = registration.register(player.getName(), player.getPassword(), player.getData());
@@ -203,12 +202,56 @@ public class RegistrationController {
         registration.setSessionId(jessionId, code);
         if (approved) {
             return "redirect:/" + register(player.getName(), player.getCode(),
-                            player.getGameName(), request.getRemoteAddr());
+                    player.getGameName(), request.getRemoteAddr());
         } else {
             model.addAttribute("wait_approve", true);
             return openRegistrationForm(request, model);
         }
     }
+
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    public String submitRegistrationFormLogin(Player player, BindingResult result, HttpServletRequest request, Model model) {
+        if (result.hasErrors()) {
+            return openRegistrationForm(request, model);
+        }
+
+        String code;
+        boolean registered = registration.registered(player.getName());
+        boolean approved = registration.approved(player.getName());
+        String jessionId = getGlobalSessionID();
+
+        if (registered && !approved) {
+            model.addAttribute("wait_approve", true);
+            return openRegistrationForm(request, model);
+        }
+
+        if (registered && approved) {
+            code = registration.login(player.getName(), player.getPassword());
+            if (code == null) {
+                model.addAttribute("bad_pass", true);
+
+                return openRegistrationForm(request, model);
+            }
+            player.setCode(code);
+            registration.setSessionId(jessionId, code);
+            return "redirect:/" + register(player.getName(), player.getCode(),
+                    player.getGameName(), request.getRemoteAddr());
+        } else {
+            model.addAttribute("message", "You need to register first!");
+            return openRegistrationForm(request, model);
+        }
+
+
+    }
+
+
+    private String getGlobalSessionID() {
+        ServletRequestAttributes attr = (ServletRequestAttributes)
+                RequestContextHolder.currentRequestAttributes();
+        HttpSession session = attr.getRequest().getSession(true);
+        return session.getId();
+    }
+
 
     private String register(String name, String code, String gameName, String ip) {
         Player player = playerService.register(name, ip, gameName);
@@ -217,7 +260,7 @@ public class RegistrationController {
 
     private String getBoardUrl(String code, Player player) {
 //        if (player.getGameType().isSingleBoard()) {
-            return "board/player/" + player.getName() + "?code=" + code;
+        return "board/player/" + player.getName() + "?code=" + code;
 //        } else {
 //            return "board/?code=" + code;
 //        }
