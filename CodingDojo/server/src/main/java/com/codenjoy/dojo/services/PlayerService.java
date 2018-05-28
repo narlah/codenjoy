@@ -48,4 +48,7 @@ public interface PlayerService extends Tickable {
     void openRegistration();
 
     void reloadAI(String name);
+
+    public Player register(String name, String callbackUrl, String gameName, String playerName);
+    public Player register(PlayerSave save, String playerName);
 }

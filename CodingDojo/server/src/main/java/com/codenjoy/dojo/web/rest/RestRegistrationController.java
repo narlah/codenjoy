@@ -25,6 +25,8 @@ package com.codenjoy.dojo.web.rest;
 
 import com.codenjoy.dojo.services.*;
 import com.codenjoy.dojo.services.dao.Registration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -39,6 +42,8 @@ import static java.util.stream.Collectors.toList;
 @Controller
 @RequestMapping(value = "/rest")
 public class RestRegistrationController {
+
+    private final Logger logger = LoggerFactory.getLogger(RestRegistrationController.class);
 
     @Autowired private Registration registration;
     @Autowired private PlayerService playerService;
@@ -55,6 +60,7 @@ public class RestRegistrationController {
         private final String name;
         private final String score;
         private final String code;
+        private final String playerName;
 
         PlayerInfo(Player player) {
             gameType = player.getGameType().name();
@@ -62,6 +68,7 @@ public class RestRegistrationController {
             name = player.getName();
             score = String.valueOf(player.getScore());
             code = player.getCode();
+            playerName = player.getPlayerName();
         }
 
         public String getGameType() {
@@ -83,13 +90,25 @@ public class RestRegistrationController {
         public String getCode() {
             return code;
         }
+
+        public String getPlayerName() { return playerName; }
     }
 
-    @RequestMapping(value = "/game/{gameName}/players", method = RequestMethod.GET)
+   /* @RequestMapping(value = "/game/{gameName}/players", method = RequestMethod.GET)
     @ResponseBody
     public List<PlayerInfo> getPlayerForGame(@PathVariable("gameName") String gameName) {
         return playerService.getAll(gameName).stream()
                 .map(PlayerInfo::new)
                 .collect(toList());
+    }*/
+
+    @RequestMapping(value = "/game/{gameName}/players", method = RequestMethod.GET)
+    @ResponseBody
+    public List<PlayerInfo> getPlayerForGame(@PathVariable("gameName") String gameName) {
+        List<Player> players = playerService.getAll(gameName);
+//        logger.info(">>> players = "+players.size());
+        Collections.sort(players, new PlayerSortBy());
+//        logger.info(">>> players sorted = "+players.size());
+        return players.stream().map(PlayerInfo::new).collect(toList());
     }
 }

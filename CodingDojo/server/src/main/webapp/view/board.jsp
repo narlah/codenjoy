@@ -45,7 +45,7 @@
     <script src="${ctx}/resources/js/canvases-text.js"></script>
     <script src="${ctx}/resources/js/layout.js"></script>
     <script src="${ctx}/resources/js/donate.js"></script>
-    <script src="${ctx}/resources/js/joystick.js"></script>
+
     <script src="${ctx}/resources/js/leaderstable.js"></script>
     <script src="${ctx}/resources/js/chat.js"></script>
     <script src="${ctx}/resources/js/hotkeys.js"></script>

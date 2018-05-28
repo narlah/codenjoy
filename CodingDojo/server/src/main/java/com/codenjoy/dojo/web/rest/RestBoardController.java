@@ -29,6 +29,8 @@ import com.codenjoy.dojo.services.dao.Registration;
 import com.codenjoy.dojo.services.playerdata.ChatLog;
 import com.codenjoy.dojo.services.settings.Parameter;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +41,8 @@ import java.util.*;
 @Controller
 @RequestMapping(value = "/rest")
 public class RestBoardController {
+
+    private final Logger logger = LoggerFactory.getLogger(RestBoardController.class);
 
     @Autowired
     private GameService gameService;
@@ -162,21 +166,30 @@ public class RestBoardController {
     @ResponseBody
     public String persistData(Player player, @RequestParam("jsessionID") String jsessionID, @RequestParam("jsessionID1") String jsessionID1) {
         Player existingPlayer = playerService.get(player.getName());
+        logger.info(">>> existingPlayer="+existingPlayer);
         if (existingPlayer == NullPlayer.INSTANCE) {
+            logger.info(">>> error....");
             return "error";
         }
         Registration.User user = registration.getUser(jsessionID);
+        logger.info(">>> user="+user);
         Registration.User user1 = registration.getUser(jsessionID1);
+        logger.info(">>> user1="+user1);
         String localJSessionID ="-1";
-        if (user != null)
+        if (user != null){
             localJSessionID = user.getJsessionID();
-        else if (user1 != null)
+        logger.info(">>> localJSessionID 1="+localJSessionID);}
+        else if (user1 != null) {
             localJSessionID = user1.getJsessionID();
+            logger.info(">>> localJSessionID 2=" + localJSessionID);
+        }
         if (user != null &&
                 (!existingPlayer.getName().equals(player.getName())) &&
                 (jsessionID.equals(localJSessionID) || jsessionID1.equals(localJSessionID))) { //             !player.getjSessionID().equals(user.getJsessionID()))
+            logger.info(">>> error======");
             return "error";
         }
+        logger.info(">>> file generation.....");
         CodeSaver.save(player.getName(), player.getGameName(), new Date().getTime(), player.getData());
         return "ok";
     }

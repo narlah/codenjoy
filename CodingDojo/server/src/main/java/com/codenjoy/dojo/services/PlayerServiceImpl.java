@@ -101,6 +101,28 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
+    public Player register(String name, String callbackUrl, String gameName, String playerName) {
+        lock.writeLock().lock();
+        try {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Registered user {} in game {}", name, gameName);
+            }
+
+            if (!registration) {
+                return NullPlayer.INSTANCE;
+            }
+
+            registerAIFor(name, gameName);
+
+            Player player = register(new PlayerSave(name, callbackUrl, gameName, 0, null), playerName);
+
+            return player;
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    @Override
     public void reloadAI(String name) {
         lock.writeLock().lock();
         try {
@@ -145,6 +167,20 @@ public class PlayerServiceImpl implements PlayerService {
         return register(name, save.getCallbackUrl(), gameName, save.getScore(), save.getSave());
     }
 
+    @Override
+    public Player register(PlayerSave save, String playerName) {
+        String name = save.getName();
+        String gameName = save.getGameName();
+
+        GameType gameType = gameService.getGame(gameName);
+        if (name.endsWith(BOT_EMAIL_SUFFIX)) {
+            gameType.newAI(name);
+        }
+
+        return register(name, save.getCallbackUrl(), gameName, save.getScore(), save.getSave(), playerName);
+    }
+
+
     private Player register(String name, String callbackUrl, String gameName, Object score, String data) {
         Player player = get(name);
         GameType gameType = gameService.getGame(gameName);
@@ -168,6 +204,34 @@ public class PlayerServiceImpl implements PlayerService {
             playerGames.add(player, game, playerController, screenController);
         } else {
           // do nothing
+        }
+
+        return player;
+    }
+
+    private Player register(String name, String callbackUrl, String gameName, Object score, String data, String playerName) {
+        Player player = get(name);
+        GameType gameType = gameService.getGame(gameName);
+
+        boolean newPlayer = (player instanceof NullPlayer) || !gameName.equals(player.getGameName());
+        if (newPlayer) {
+            playerGames.remove(player);
+
+            PlayerScores playerScores = gameType.getPlayerScores(score);
+            InformationCollector informationCollector = new InformationCollector(playerScores);
+
+            Game game = gameType.newGame(informationCollector, printer, data, name);
+
+            if (logger.isDebugEnabled()) {
+                logger.info("Player {} starting new game {}", name, game);
+            }
+
+            player = new Player(name, callbackUrl,
+                    gameType, playerScores, informationCollector, playerName);
+
+            playerGames.add(player, game, playerController, screenController);
+        } else {
+            // do nothing
         }
 
         return player;

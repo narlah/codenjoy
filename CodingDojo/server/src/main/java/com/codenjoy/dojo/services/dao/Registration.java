@@ -47,7 +47,8 @@ public class Registration {
                         "password varchar(255)," +
                         "code varchar(255)," +
                         "data varchar(255)," +
-                        "jsessionID varchar(255));");
+                        "jsessionID varchar(255)," +
+                        "player_name varchar(255));");
     }
 
     void removeDatabase() {
@@ -91,8 +92,15 @@ public class Registration {
 
     public String register(final String email, final String password, String data) {
         String code = makeCode(email, password);
-        pool.update("INSERT INTO users (email, email_approved, password, code, data, jsessionID) VALUES (?,?,?,?,?,?);",
-                new Object[]{email, 0, password, code, data, ""});
+        pool.update("INSERT INTO users (email, email_approved, password, code, data, jsessionID, player_name) VALUES (?,?,?,?,?,?,?);",
+                new Object[]{email, 0, password, code, data, "", ""});
+        return code;
+    }
+
+    public String register(final String email, final String password, String data, String playerName) {
+        String code = makeCode(email, password);
+        pool.update("INSERT INTO users (email, email_approved, password, code, data, jsessionID, player_name) VALUES (?,?,?,?,?,?,?);",
+                new Object[]{email, 0, password, code, data, "", playerName});
         return code;
     }
 

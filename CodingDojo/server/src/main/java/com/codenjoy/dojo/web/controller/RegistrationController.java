@@ -27,6 +27,8 @@ import com.codenjoy.dojo.client.WebSocketRunner;
 import com.codenjoy.dojo.services.*;
 import com.codenjoy.dojo.services.dao.Registration;
 import com.codenjoy.dojo.services.mail.MailService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -49,6 +51,8 @@ import java.util.Map;
 @Controller
 @RequestMapping("/register")
 public class RegistrationController {
+
+    private final Logger logger = LoggerFactory.getLogger(RegistrationController.class);
 
     @Autowired
     private PlayerService playerService;
@@ -166,7 +170,7 @@ public class RegistrationController {
             }
         } else {
             if (!registered) {
-                code = registration.register(player.getName(), player.getPassword(), player.getData());
+                code = registration.register(player.getName(), player.getPassword(), player.getData(), player.getPlayerName());
             } else {
                 code = registration.getCode(player.getName());
             }
@@ -207,7 +211,7 @@ public class RegistrationController {
         registration.setSessionId(jessionId, code);
         if (approved) {
             return "redirect:/" + register(player.getName(), player.getCode(),
-                            player.getGameName(), request.getRemoteAddr());
+                            player.getGameName(), request.getRemoteAddr(), player.getPlayerName());
         } else {
             model.addAttribute("wait_approve", true);
             return openRegistrationForm(request, model);
@@ -221,6 +225,10 @@ public class RegistrationController {
         return session.getId();
     }
 
+    private String register(String name, String code, String gameName, String ip, String playerName) {
+        Player player = playerService.register(name, ip, gameName, playerName);
+        return getBoardUrl(code, player);
+    }
 
     private String register(String name, String code, String gameName, String ip) {
         Player player = playerService.register(name, ip, gameName);

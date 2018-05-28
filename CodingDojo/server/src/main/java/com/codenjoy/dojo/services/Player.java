@@ -38,6 +38,7 @@ public class Player implements ScreenRecipient {
     private PlayerScores scores;
     private Information info;
     private GameType gameType;
+    private String playerName;
 
     private String jSessionID;
 
@@ -54,6 +55,15 @@ public class Player implements ScreenRecipient {
         this.gameType = gameType;
         this.scores = scores;
         this.info = info;
+    }
+
+    public Player(String name, String callbackUrl, GameType gameType, PlayerScores scores, Information info, String playerName) {
+        this.name = name;
+        this.callbackUrl = callbackUrl;
+        this.gameType = gameType;
+        this.scores = scores;
+        this.info = info;
+        this.playerName = playerName;
     }
 
     public GameType getGameType() {
@@ -158,4 +168,11 @@ public class Player implements ScreenRecipient {
         this.jSessionID = jSessionID;
     }
 
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
+    }
 }
