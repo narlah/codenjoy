@@ -46,29 +46,29 @@ public class HackathonRegistrationController {
     }
 
     @RequestMapping(params = "isRegistered", method = RequestMethod.GET)
-    public @ResponseBody
-    String isRegistered(@RequestParam("isRegistered") String contact_email) {
+    @ResponseBody
+    public String isRegistered(@RequestParam("isRegistered") String contact_email) {
         return "{ \"registered\":" + hackathonRegistration.isRegistered(contact_email) + "}";
     }
 
 
     @RequestMapping(method = RequestMethod.GET)
-    public @ResponseBody
-    List<HackathonRegistrant> all() {
+    @ResponseBody
+    public List<HackathonRegistrant> all() {
         return hackathonRegistration.getHackathonRegistrants();
     }
 
     @RequestMapping(params = "regDetailsFor", method = RequestMethod.GET)
-    public @ResponseBody
-    HackathonRegistrant regDetailsFor(@RequestParam("regDetailsFor") String email) {
+    @ResponseBody
+    public HackathonRegistrant regDetailsFor(@RequestParam("regDetailsFor") String email) {
         HackathonRegistrant hackathonRegistrant = hackathonRegistration.getRegistrant(email);
         return hackathonRegistrant;
     }
 
 
     @RequestMapping(method = RequestMethod.POST)
-    public @ResponseBody
-    String submitRegistration(@RequestBody HackathonRegistrant req) {
+    @ResponseBody
+    public String submitRegistration(HackathonRegistrant req) {
         try {
             HackathonRegistrant registrant = new HackathonRegistrant(
                     req.getContactEmail(),
