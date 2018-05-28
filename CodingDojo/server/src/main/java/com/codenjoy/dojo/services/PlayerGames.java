@@ -97,16 +97,6 @@ public class PlayerGames implements Iterable<PlayerGame>, Tickable {
         return result;
     }
 
-    public Set<Player> playersSet() {
-        Set<Player> result = new TreeSet();
-
-        for (PlayerGame playerGame : playerGames) {
-            result.add(playerGame.getPlayer());
-        }
-
-        return result;
-    }
-
     public int size() {
         return playerGames.size();
     }
