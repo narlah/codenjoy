@@ -53,9 +53,11 @@ public class CodeWinnersController {
 
     @RequestMapping(method = RequestMethod.GET)
     public @ResponseBody
-    String isRegistered(HttpServletRequest _request, @RequestParam("jsessionID") String jsessionID, @RequestParam("jsessionID1") String jsessionID1) {
+    String isRegistered(HttpServletRequest request, @RequestParam("jsessionID") String jsessionID,
+                        @RequestParam("jsessionID1") String jsessionID1) {
         Registration.User user = registration.getUser(jsessionID);
-        String jsessionIDLocal = registration.getJSessionId(user.getJsessionID());
+        String jsessionIDLocal = registration.getJSessionId(user.getEmail());
+
         if (user != null && (jsessionIDLocal.equals(jsessionID) || jsessionIDLocal.equals(jsessionID1))) {
             String hasCode = codeForReward.getCode(user.getEmail());
             if (!hasCode.equals("false")) {
