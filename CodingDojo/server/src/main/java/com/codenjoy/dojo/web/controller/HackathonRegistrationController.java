@@ -78,9 +78,7 @@ public class HackathonRegistrationController {
                     req.getTeamDescription()
             );
             try {
-                //String email = "Maria_Zharova@epam.com";
-                String email = "testrpa0@gmail.com";
-                mailService.sendEmail(email, "Codenjoy регистрация",
+                mailService.sendEmail("Codenjoy регистрация",
                         "Somebody just registered for the hackathlon \n His details : \n Email " +
                                 registrant.getContactEmail() + " \n Name : " + registrant.getContactName() +
                                 "\n phone " + registrant.getContactPhone() +
