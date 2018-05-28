@@ -99,7 +99,54 @@ public class MailService {
             return;
         }
         String port = "465";
+        Properties props = setProperties(port);
 
+        // Get the default Session object.
+        Session session = Session.getInstance(props, new Authenticator() {
+            public PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(emailName, emailPassword);
+            }
+        });
+
+        MimeMessage message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(emailName));
+        message.addRecipient(Message.RecipientType.TO, new InternetAddress(emailTo));
+        message.setSubject(title);
+        message.setContent(body, "text/html; charset=utf-8");
+        Transport transport = session.getTransport("smtps");
+        transport.send(message);
+        transport.close();
+        logger.info(">>> msg sent!!!");
+    }
+
+    public void sendEmailTo(String to, String title, String body) throws MessagingException {
+        if (StringUtils.isEmpty(emailName)) {
+            logger.info(">>> empty....");
+            return;
+        }
+        String port = "465";
+
+        Properties props = setProperties(port);
+
+        // Get the default Session object.
+        Session session = Session.getInstance(props, new Authenticator() {
+            public PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(emailName, emailPassword);
+            }
+        });
+
+        MimeMessage message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(emailName));
+        message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+        message.setSubject(title);
+        message.setContent(body, "text/html; charset=utf-8");
+        Transport transport = session.getTransport("smtps");
+        transport.send(message);
+        transport.close();
+        logger.info(">>> msg sent!!!");
+    }
+
+    private Properties setProperties(String port) {
         Properties props = System.getProperties();
 
         props.put("mail.smtp.auth", "true");
@@ -111,45 +158,6 @@ public class MailService {
         //props.put("mail.debug", "true");
         props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         props.put("mail.smtp.socketFactory.fallback", "false");
-
-       /* props.put("mail.transport.protocol", "smtps");
-        props.put("mail.smtp.host", "gc2.nodecluster.net");
-//        props.put("mail.smtp.host", "mail.codenjoy.com");
-//        props.put("mail.smtp.port", "26");
-        props.put("mail.smtp.port", port);
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.ssl.enable", "true");
-        props.setProperty("mail.smtp.ssl.trust", "gc2.nodecluster.net");
-        props.put("mail.smtp.user", emailName);
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.EnableSSL.enable", "true");
-        props.put("mail.debug", "true");
-        props.put("mail.password", emailPassword);
-        props.put("mail.user", emailName);
-        props.put("mail.from", emailName);
-        props.put("mail.smtp.localhost", "codenjoy.com");
-        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        props.put("mail.smtp.socketFactory.fallback", "false");
-        props.put("mail.smtp.port", port);
-        props.put("mail.smtp.socketFactory.port", port); */
-
-        logger.info(">>> before session.....");
-        // Get the default Session object.
-        Session session = Session.getInstance(props, new Authenticator() {
-            public PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(emailName, emailPassword);
-            }
-        });
-//        session.setProtocolForAddress("rfc822", "smtps");
-
-        MimeMessage message = new MimeMessage(session);
-        message.setFrom(new InternetAddress(emailName));
-        message.addRecipient(Message.RecipientType.TO, new InternetAddress(emailTo));
-        message.setSubject(title);
-        message.setContent(body, "text/html; charset=utf-8");
-        Transport transport = session.getTransport("smtps");
-        transport.send(message);
-        transport.close();
-        logger.info(">>> msg sent!!!");
+        return props;
     }
 }
