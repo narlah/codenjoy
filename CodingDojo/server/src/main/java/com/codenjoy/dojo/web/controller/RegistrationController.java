@@ -240,6 +240,7 @@ public class RegistrationController {
             }
             player.setCode(code);
             registration.setSessionId(jessionId, code);
+            model.addAttribute("message", "Loging In");
             return "redirect:/" + register(email, code,
                     player.getGameName(), request.getRemoteAddr());
         } else {
