@@ -25,6 +25,8 @@ import com.codenjoy.dojo.services.dao.CodeForReward;
 import com.codenjoy.dojo.services.dao.CodeReward;
 import com.codenjoy.dojo.services.dao.Registration;
 import com.codenjoy.dojo.services.mail.MailService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +42,8 @@ import java.util.List;
 @Controller
 @RequestMapping("/codeWinners")
 public class CodeWinnersController {
+
+    private final Logger logger = LoggerFactory.getLogger(CodeWinnersController.class);
 
     @Autowired
     private CodeForReward codeForReward;
@@ -101,11 +105,11 @@ public class CodeWinnersController {
 
     private void sendEmailForCode(String contact_email, String code) {
         try {
-            mailService.sendEmail("Codenjoy winner",
-                    "You got rewarded \n Pass by our boot to receive your reward : \n Email " +
-                            "\n email: " + contact_email +
-                            "\n Your code" + code +
-                            "\n Best regards Team Codenjoy<>"
+            mailService.sendEmailTo(contact_email,"Hackathon Game winner",
+                    "You've got rewarded !!!" +
+                            "<br/>Please pass by our boot to receive your reward." +
+                            "<br/><br/>Your code: " + code +
+                            "<br/><br/>EPAM Systems Team"
             );
         } catch (MessagingException ignored) {
         }

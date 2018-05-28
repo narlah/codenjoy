@@ -78,13 +78,14 @@ public class HackathonRegistrationController {
                     req.getTeamDescription()
             );
             try {
-                mailService.sendEmail("Codenjoy регистрация",
-                        "Somebody just registered for the hackathlon \n His details : \n Email " +
-                                registrant.getContactEmail() + " \n Name : " + registrant.getContactName() +
-                                "\n phone " + registrant.getContactPhone() +
-                                "\n team name : " + registrant.getTeamName() +
-                                "\n team description " + registrant.getTeamDescription() +
-                                "\n Best regards Team Codenjoy<>"
+                mailService.sendEmail("Hackathon registration",
+                        "Somebody just registered for the hackathon with the following details:" +
+                                "<br/>Contact email: " + registrant.getContactEmail() +
+                                "<br/>Contact name: " + registrant.getContactName() +
+                                "<br/>Contact phone: " + registrant.getContactPhone() +
+                                "<br/>Team name: " + registrant.getTeamName() +
+                                "<br/>Team description: " + registrant.getTeamDescription() +
+                                "<br/><br/>EPAM Systems Team"
                 );
             } catch (MessagingException e) {
 
