@@ -40,11 +40,16 @@ import java.util.*;
 @RequestMapping(value = "/rest")
 public class RestBoardController {
 
-    @Autowired private GameService gameService;
-    @Autowired private PlayerService playerService;
-    @Autowired private Registration registration;
-    @Autowired private ServletContext servletContext;
-    @Autowired private ChatService chatService;
+    @Autowired
+    private GameService gameService;
+    @Autowired
+    private PlayerService playerService;
+    @Autowired
+    private Registration registration;
+    @Autowired
+    private ServletContext servletContext;
+    @Autowired
+    private ChatService chatService;
 
     @RequestMapping(value = "/sprites", method = RequestMethod.GET)
     @ResponseBody
@@ -144,8 +149,7 @@ public class RestBoardController {
     public String chat(@PathVariable("gameName") String gameName,
                        @PathVariable("playerName") String name,
                        @RequestParam("code") String code,
-                       @RequestParam("message") String message)
-    {
+                       @RequestParam("message") String message) {
         Player player = playerService.get(registration.getEmail(code));
         if (player != NullPlayer.INSTANCE && player.getName().equals(name)) {
             chatService.chat(player.getName(), message);
@@ -156,18 +160,24 @@ public class RestBoardController {
 
     @RequestMapping(value = "/persistData", method = RequestMethod.POST)
     @ResponseBody
-    public String persistData(Player player){
+    public String persistData(Player player, @RequestParam("jsessionID") String jsessionID, @RequestParam("jsessionID1") String jsessionID1) {
         Player existingPlayer = playerService.get(player.getName());
         if (existingPlayer == NullPlayer.INSTANCE) {
             return "error";
         }
-        Registration.User user= registration.getUser(player.getjSessionID());
-        if (user!= null &&
-                (!existingPlayer.getName().equals(player.getName()) ||
-                !player.getjSessionID().equals(user.getJsessionID()))) {
+        Registration.User user = registration.getUser(jsessionID);
+        Registration.User user1 = registration.getUser(jsessionID1);
+        String localJSessionID ="-1";
+        if (user != null)
+            localJSessionID = user.getJsessionID();
+        else if (user1 != null)
+            localJSessionID = user1.getJsessionID();
+        if (user != null &&
+                (!existingPlayer.getName().equals(player.getName())) &&
+                (jsessionID.equals(localJSessionID) || jsessionID1.equals(localJSessionID))) { //             !player.getjSessionID().equals(user.getJsessionID()))
             return "error";
         }
-        CodeSaver.save(player.getName(), new Date().getTime(), player.getData());
+        CodeSaver.save(player.getName(), player.getGameName(), new Date().getTime(), player.getData());
         return "ok";
     }
 }

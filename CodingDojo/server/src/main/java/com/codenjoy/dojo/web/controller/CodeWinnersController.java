@@ -53,9 +53,10 @@ public class CodeWinnersController {
 
     @RequestMapping(method = RequestMethod.GET)
     public @ResponseBody
-    String isRegistered(HttpServletRequest _request, @RequestParam("jsessionID") String jsessionID) {
+    String isRegistered(HttpServletRequest _request, @RequestParam("jsessionID") String jsessionID, @RequestParam("jsessionID1") String jsessionID1) {
         Registration.User user = registration.getUser(jsessionID);
-        if (user != null && user.getJsessionID().equals(jsessionID)) {
+        String jsessionIDLocal = registration.getJSessionId(user.getJsessionID());
+        if (user != null && (jsessionIDLocal.equals(jsessionID) || jsessionIDLocal.equals(jsessionID1))) {
             String hasCode = codeForReward.getCode(user.getEmail());
             if (!hasCode.equals("false")) {
                 return "{\"alreadyHasCode\":" + "\"true\", " +
@@ -75,9 +76,10 @@ public class CodeWinnersController {
 
     @RequestMapping(value = "/resend", method = RequestMethod.GET)
     public @ResponseBody
-    String resendEmail(@RequestParam("jsessionID") String jsessionID) {
+    String resendEmail(@RequestParam("jsessionID") String jsessionID, @RequestParam("jsessionID1") String jsessionID1) {
         Registration.User user = registration.getUser(jsessionID);
-        if (user != null && user.getJsessionID().equals(jsessionID)) {
+        String jsessionIDLocal = registration.getJSessionId(user.getJsessionID());
+        if (user != null && (jsessionIDLocal.equals(jsessionID) || jsessionIDLocal.equals(jsessionID1))) {
 
             String code = codeForReward.getCode(user.getEmail());
             if (!code.equals("true")) {
@@ -110,9 +112,10 @@ public class CodeWinnersController {
 
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public @ResponseBody
-    List<CodeReward> all(@RequestParam("jsessionID") String jsessionID) {
+    List<CodeReward> all(@RequestParam("jsessionID") String jsessionID, @RequestParam("jsessionID1") String jsessionID1) {
         Registration.User user = registration.getUser(jsessionID);
-        if (user != null && registration.getJSessionId(user.getJsessionID()).equals(jsessionID)) {
+        String jsessionIDLocal = registration.getJSessionId(user.getJsessionID());
+        if (user != null && (jsessionIDLocal.equals(jsessionID) || jsessionIDLocal.equals(jsessionID1))) {
             return codeForReward.getAll();
         } else
             return Collections.emptyList();

@@ -43,6 +43,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.Enumeration;
 import java.util.Map;
 
 @Controller
@@ -147,9 +148,11 @@ public class RegistrationController {
 
     @RequestMapping(method = RequestMethod.POST)
     public String submitRegistrationForm(Player player, BindingResult result, HttpServletRequest request, Model model) {
-        if (result.hasErrors()) {
+        if (result.hasErrors() || player == null || player.getName() == null) {
             return openRegistrationForm(request, model);
         }
+        String email = player.getName();
+
 
         String code;
         boolean registered = registration.registered(player.getName());
@@ -157,11 +160,10 @@ public class RegistrationController {
         String jessionId = getGlobalSessionID();
 
         if (registered && approved) {
-            //TEMPORARY TODO REMOVE AFTER
-            return "redirect:/" + register(player.getName(), player.getCode(),
-                    player.getGameName(), request.getRemoteAddr());
-            //model.addAttribute("message", "Already Registered!");
-            //return openRegistrationForm(request, model);
+//            return "redirect:/" + register(player.getName(), registration.getCode(player.getName()),
+//                    player.getGameName(), request.getRemoteAddr());
+            model.addAttribute("message", "Already Registered!");
+            return openRegistrationForm(request, model);
         } else {
             if (!registered) {
                 code = registration.register(player.getName(), player.getPassword(), player.getData());
@@ -173,7 +175,7 @@ public class RegistrationController {
                 if (isEmailVerificationNeeded) {
                     LinkService.LinkStorage storage = linkService.forLink();
                     Map<String, Object> map = storage.getMap();
-                    String email = player.getName();
+
                     map.put("name", email);
                     map.put("code", code);
                     map.put("gameName", player.getGameName());
@@ -205,7 +207,7 @@ public class RegistrationController {
         registration.setSessionId(jessionId, code);
         if (approved) {
             return "redirect:/" + register(player.getName(), player.getCode(),
-                    player.getGameName(), request.getRemoteAddr());
+                            player.getGameName(), request.getRemoteAddr());
         } else {
             model.addAttribute("wait_approve", true);
             return openRegistrationForm(request, model);
@@ -214,13 +216,13 @@ public class RegistrationController {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String submitRegistrationFormLogin(Player player, BindingResult result, HttpServletRequest request, Model model) {
-        if (result.hasErrors()) {
+        if (result.hasErrors() || player == null || player.getName() == null) {
             return openRegistrationForm(request, model);
         }
-
+        String email = player.getName();
         String code;
-        boolean registered = registration.registered(player.getName());
-        boolean approved = registration.approved(player.getName());
+        boolean registered = registration.registered(email);
+        boolean approved = registration.approved(email);
         String jessionId = getGlobalSessionID();
 
         if (registered && !approved) {
@@ -229,7 +231,8 @@ public class RegistrationController {
         }
 
         if (registered && approved) {
-            code = registration.login(player.getName(), player.getPassword());
+
+            code = registration.login(email, player.getPassword());
             if (code == null) {
                 model.addAttribute("bad_pass", true);
 
@@ -237,7 +240,7 @@ public class RegistrationController {
             }
             player.setCode(code);
             registration.setSessionId(jessionId, code);
-            return "redirect:/" + register(player.getName(), player.getCode(),
+            return "redirect:/" + register(email, code,
                     player.getGameName(), request.getRemoteAddr());
         } else {
             model.addAttribute("message", "You need to register first!");

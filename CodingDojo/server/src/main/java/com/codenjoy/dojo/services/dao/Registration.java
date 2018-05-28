@@ -91,8 +91,8 @@ public class Registration {
 
     public String register(final String email, final String password, String data) {
         String code = makeCode(email, password);
-        pool.update("INSERT INTO users (email, email_approved, password, code, data) VALUES (?,?,?,?,?);",
-                new Object[]{email, 0, password, code, data});
+        pool.update("INSERT INTO users (email, email_approved, password, code, data, jsessionID) VALUES (?,?,?,?,?,?);",
+                new Object[]{email, 0, password, code, data, ""});
         return code;
     }
 
