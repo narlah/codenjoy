@@ -64,7 +64,6 @@
                     <span class="error">
                         <c:if test="${bad_pass}">Already registered</c:if>
                         <c:if test="${wait_approve}">Please check your email</c:if>
-                        <c:if test="${message}">"${message}"</c:if>
                     </span>
                 </td>
             </tr>

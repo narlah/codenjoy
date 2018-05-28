@@ -151,8 +151,6 @@ public class RegistrationController {
         if (result.hasErrors() || player == null || player.getName() == null) {
             return openRegistrationForm(request, model);
         }
-        String email = player.getName();
-
 
         String code;
         boolean registered = registration.registered(player.getName());
@@ -160,10 +158,12 @@ public class RegistrationController {
         String jessionId = getGlobalSessionID();
 
         if (registered && approved) {
-//            return "redirect:/" + register(player.getName(), registration.getCode(player.getName()),
-//                    player.getGameName(), request.getRemoteAddr());
-            model.addAttribute("message", "Already Registered!");
-            return openRegistrationForm(request, model);
+            code = registration.login(player.getName(), player.getPassword());
+            if (code == null) {
+                model.addAttribute("bad_pass", true);
+
+                return openRegistrationForm(request, model);
+            }
         } else {
             if (!registered) {
                 code = registration.register(player.getName(), player.getPassword(), player.getData());
@@ -175,7 +175,7 @@ public class RegistrationController {
                 if (isEmailVerificationNeeded) {
                     LinkService.LinkStorage storage = linkService.forLink();
                     Map<String, Object> map = storage.getMap();
-
+                    String email = player.getName();
                     map.put("name", email);
                     map.put("code", code);
                     map.put("gameName", player.getGameName());
@@ -213,44 +213,6 @@ public class RegistrationController {
             return openRegistrationForm(request, model);
         }
     }
-
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public String submitRegistrationFormLogin(Player player, BindingResult result, HttpServletRequest request, Model model) {
-        if (result.hasErrors() || player == null || player.getName() == null) {
-            return openRegistrationForm(request, model);
-        }
-        String email = player.getName();
-        String code;
-        boolean registered = registration.registered(email);
-        boolean approved = registration.approved(email);
-        String jessionId = getGlobalSessionID();
-
-        if (registered && !approved) {
-            model.addAttribute("wait_approve", true);
-            return openRegistrationForm(request, model);
-        }
-
-        if (registered && approved) {
-
-            code = registration.login(email, player.getPassword());
-            if (code == null) {
-                model.addAttribute("bad_pass", true);
-
-                return openRegistrationForm(request, model);
-            }
-            player.setCode(code);
-            registration.setSessionId(jessionId, code);
-            model.addAttribute("message", "Loging In");
-            return "redirect:/" + register(email, code,
-                    player.getGameName(), request.getRemoteAddr());
-        } else {
-            model.addAttribute("message", "You need to register first!");
-            return openRegistrationForm(request, model);
-        }
-
-
-    }
-
 
     private String getGlobalSessionID() {
         ServletRequestAttributes attr = (ServletRequestAttributes)

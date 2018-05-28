@@ -28,6 +28,5 @@
        <meta http-equiv="refresh" content="0; url=${url}" />
     </head>
     <body>
-    "${message}"
     </body>
 </html>
