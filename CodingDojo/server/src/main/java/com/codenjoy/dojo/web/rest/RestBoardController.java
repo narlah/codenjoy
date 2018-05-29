@@ -165,12 +165,18 @@ public class RestBoardController {
     @RequestMapping(value = "/persistData", method = RequestMethod.POST)
     @ResponseBody
     public String persistData(Player player, @RequestParam("jsessionID") String jsessionID, @RequestParam("jsessionID1") String jsessionID1) {
-        Player existingPlayer = playerService.get(player.getName());
+
+        String existingJSessionId = registration.getJSessionId(player.getName());
+        logger.info(">>> existingJSessionId="+existingJSessionId);
+        if (existingJSessionId == null) {
+            return "error";
+        }
+        /*Player existingPlayer = playerService.get(player.getName());
         logger.info(">>> existingPlayer="+existingPlayer);
         if (existingPlayer == NullPlayer.INSTANCE) {
             logger.info(">>> error....");
             return "error";
-        }
+        }*/
         Registration.User user = registration.getUser(jsessionID);
         logger.info(">>> user="+user);
         Registration.User user1 = registration.getUser(jsessionID1);
@@ -178,15 +184,17 @@ public class RestBoardController {
         String localJSessionID ="-1";
         if (user != null){
             localJSessionID = user.getJsessionID();
-        logger.info(">>> localJSessionID 1="+localJSessionID);}
-        else if (user1 != null) {
+            logger.info(">>> localJSessionID 1="+localJSessionID);
+        } else if (user1 != null) {
             localJSessionID = user1.getJsessionID();
             logger.info(">>> localJSessionID 2=" + localJSessionID);
         }
-        if (user != null &&
-                (!existingPlayer.getName().equals(player.getName())) &&
-                (jsessionID.equals(localJSessionID) || jsessionID1.equals(localJSessionID))) { //             !player.getjSessionID().equals(user.getJsessionID()))
-            logger.info(">>> error======");
+        if (user == null && user1 == null) {
+            logger.info(">>> users null error======");
+            return "error";
+        }
+        if (!jsessionID.equals(localJSessionID) && !jsessionID1.equals(localJSessionID)) {
+            logger.info(">>> sessionIDs error======");
             return "error";
         }
         logger.info(">>> file generation.....");

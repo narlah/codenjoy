@@ -60,9 +60,15 @@ public class CodeWinnersController {
     String isRegistered(HttpServletRequest request, @RequestParam("jsessionID") String jsessionID,
                         @RequestParam("jsessionID1") String jsessionID1) {
         Registration.User user = registration.getUser(jsessionID);
-        String jsessionIDLocal = registration.getJSessionId(user.getEmail());
+        logger.info(">>> user="+user+"  jsessionID="+jsessionID);
 
-        if (user != null && (jsessionIDLocal.equals(jsessionID) || jsessionIDLocal.equals(jsessionID1))) {
+        if(user == null) {
+            return "error";
+        }
+        String jsessionIDLocal = registration.getJSessionId(user.getEmail());
+        logger.info(">>> user.getEmail()="+user.getEmail()+"  jsessionIDLocal="+jsessionIDLocal);
+
+        if (jsessionIDLocal.equals(jsessionID) || jsessionIDLocal.equals(jsessionID1)) {
             String hasCode = codeForReward.getCode(user.getEmail());
             if (!hasCode.equals("false")) {
                 return "{\"alreadyHasCode\":" + "\"true\", " +
