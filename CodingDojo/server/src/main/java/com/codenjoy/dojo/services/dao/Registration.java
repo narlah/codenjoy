@@ -177,14 +177,14 @@ public class Registration {
         );
     }
 
-    public String getJSessionIdByCode(final String code) {
-        return pool.select("SELECT jsessionID FROM users WHERE code = ?;",
-                new Object[]{code},
+    public String getData(final String email) {
+        return pool.select("SELECT data FROM users WHERE email = ?;",
+                new Object[]{email},
                 new ObjectMapper<String>() {
                     @Override
                     public String mapFor(ResultSet resultSet) throws SQLException {
                         if (resultSet.next()) {
-                            return resultSet.getString("jsessionID");
+                            return resultSet.getString("data");
                         } else {
                             return null;
                         }

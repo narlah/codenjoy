@@ -170,7 +170,7 @@ public class RegistrationController {
             }
         } else {
             if (!registered) {
-                code = registration.register(player.getName(), player.getPassword(), player.getData(), player.getPlayerName());
+                code = registration.register(player.getName(), player.getPassword(), player.getData(), player.getData());
             } else {
                 code = registration.getCode(player.getName());
             }
@@ -211,7 +211,7 @@ public class RegistrationController {
         registration.setSessionId(jessionId, code);
         if (approved) {
             return "redirect:/" + register(player.getName(), player.getCode(),
-                            player.getGameName(), request.getRemoteAddr(), player.getPlayerName());
+                            player.getGameName(), request.getRemoteAddr(), player.getData());
         } else {
             model.addAttribute("wait_approve", true);
             return openRegistrationForm(request, model);
@@ -225,8 +225,8 @@ public class RegistrationController {
         return session.getId();
     }
 
-    private String register(String name, String code, String gameName, String ip, String playerName) {
-        Player player = playerService.register(name, ip, gameName, playerName);
+    private String register(String name, String code, String gameName, String ip, String data) {
+        Player player = playerService.register(name, ip, gameName, data);
         return getBoardUrl(code, player);
     }
 

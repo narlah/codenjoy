@@ -168,7 +168,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public Player register(PlayerSave save, String playerName) {
+    public Player register(PlayerSave save, String data) {
         String name = save.getName();
         String gameName = save.getGameName();
 
@@ -177,7 +177,7 @@ public class PlayerServiceImpl implements PlayerService {
             gameType.newAI(name);
         }
 
-        return register(name, save.getCallbackUrl(), gameName, save.getScore(), save.getSave(), playerName);
+        return register(name, save.getCallbackUrl(), gameName, save.getScore(), save.getSave(), data);
     }
 
 
@@ -209,7 +209,7 @@ public class PlayerServiceImpl implements PlayerService {
         return player;
     }
 
-    private Player register(String name, String callbackUrl, String gameName, Object score, String data, String playerName) {
+    private Player register(String name, String callbackUrl, String gameName, Object score, String data, String playerData) {
         Player player = get(name);
         GameType gameType = gameService.getGame(gameName);
 
@@ -227,7 +227,7 @@ public class PlayerServiceImpl implements PlayerService {
             }
 
             player = new Player(name, callbackUrl,
-                    gameType, playerScores, informationCollector, playerName);
+                    gameType, playerScores, informationCollector, playerData);
 
             playerGames.add(player, game, playerController, screenController);
         } else {

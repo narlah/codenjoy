@@ -50,7 +50,9 @@ public class SaveServiceImpl implements SaveService {
     @Override
     public void loadAll() {
         for (String playerName : saver.getSavedList()) {
-            load(playerName);
+            //TODO open for optimisation , we should get all as a list and then build it , otherwise we will call db for each player
+            String data = registration.getData(playerName);
+            load(playerName, data);
         }
         chatService.setMessages(saver.loadChat());
     }
@@ -75,6 +77,15 @@ public class SaveServiceImpl implements SaveService {
             playerService.remove(name);
         }
         playerService.register(save);
+    }
+
+    @Override
+    public void load(String name, String data) {
+        PlayerSave save = saver.loadGame(name);
+        if (playerService.contains(name)) { // TODO test me
+            playerService.remove(name);
+        }
+        playerService.register(save, data);
     }
 
     @Override
