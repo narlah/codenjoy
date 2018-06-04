@@ -29,11 +29,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -56,31 +54,64 @@ public class RestRegistrationController {
         return registration.checkUser(playerName, code);
     }
 
-    static class PlayerInfo {
+    static class PlayerInfoPublic {
         private final String gameType;
-        //private final String callbackUrl;
-        private final String name;
         private final String score;
-        //private final String code;
+        private final String name;
         private final String data;
 
-        PlayerInfo(Player player) {
+        PlayerInfoPublic(Player player) {
             String playerData = player.getData();
             gameType = player.getGameType().name();
-            //callbackUrl = player.getCallbackUrl();
-            name = player.getName();
-            data= (playerData != null && playerData.length() > 2) ? playerData.substring(0, playerData.indexOf('|')) : "Anonymous";//player.getName();
+            name = (playerData != null && playerData.length() > 2) ? playerData.substring(0, playerData.indexOf('|')) : "Anonymous";
             score = String.valueOf(player.getScore());
-            //code = player.getCode();
+            data = "";
+
         }
 
         public String getGameType() {
             return gameType;
         }
 
-//        public String getCallbackUrl() {
-//            return callbackUrl;
-//        }
+        public String getScore() {
+            return score;
+        }
+
+        public String getData() {
+            return data;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
+
+    static class PlayerInfoPrivate {
+        private final String gameType;
+        private final String callbackUrl;
+        private final String name;
+        private final String score;
+        private final String code;
+        private final String data;
+
+        PlayerInfoPrivate(Player player) {
+            String playerData = player.getData();
+            gameType = player.getGameType().name();
+            callbackUrl = player.getCallbackUrl();
+            name = player.getName();
+            data = (playerData != null && playerData.length() > 2) ? playerData.substring(0, playerData.indexOf('|')) : "Anonymous";
+            score = String.valueOf(player.getScore());
+            code = player.getCode();
+        }
+
+        public String getGameType() {
+            return gameType;
+        }
+
+        public String getCallbackUrl() {
+            return callbackUrl;
+        }
 
         public String getName() {
             return name;
@@ -90,10 +121,10 @@ public class RestRegistrationController {
             return score;
         }
 
-//        public String getCode() {
-//            return code;
-//        }
-//
+        public String getCode() {
+            return code;
+        }
+
         public String getData() {
             return data;
         }
@@ -109,11 +140,16 @@ public class RestRegistrationController {
 
     @RequestMapping(value = "/game/{gameName}/players", method = RequestMethod.GET)
     @ResponseBody
-    public List<PlayerInfo> getPlayerForGame(@PathVariable("gameName") String gameName) {
+    public List<PlayerInfoPublic> getPlayerForGamePublic(@PathVariable("gameName") String gameName) {
         List<Player> players = playerService.getAll(gameName);
-//        logger.info(">>> players = "+players.size());
         Collections.sort(players, new PlayerSortBy());
-//        logger.info(">>> players sorted = "+players.size());
-        return players.stream().map(PlayerInfo::new).collect(toList());
+        return players.stream().map(PlayerInfoPublic::new).collect(toList());
+    }
+
+    @RequestMapping(value = "/game/{gameName}/players", params = "email", method = RequestMethod.GET)
+    @ResponseBody
+    public List<PlayerInfoPrivate> getPlayerForGamePrivate(@PathVariable("gameName") String gameName, @RequestParam("email") String email) {
+        List<Player> players = playerService.getAll(gameName);
+        return players.stream().filter(player -> player.getName().equals(email)).map(PlayerInfoPrivate::new).collect(toList());
     }
 }

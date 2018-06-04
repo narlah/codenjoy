@@ -21,19 +21,21 @@
  */
 
 function loadPlayers(onLoad) {
-    loadData('/rest/game/' + game.gameName + '/players', function(players) {
-        if (game.allPlayersScreen) {
+    if (game.allPlayersScreen) {
+        loadData('/rest/game/' + game.gameName + '/players', function(players) {
             game.players = players;
-        } else {
+            onLoad(game.players);
+        });
+    } else {
+        loadData('/rest/game/' + game.gameName + '/players?email='+game.playerName, function(players) {
             for (var index in players) {
                 if (players[index].name == game.playerName) {
                     game.players = [players[index]];
                 }
             }
-        }
-
-        onLoad(game.players);
-    });
+            onLoad(game.players);
+        });
+    }
 }
 
 function initBoardPage(game) {
