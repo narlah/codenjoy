@@ -49,6 +49,7 @@ public class PlayerGameSaver implements GameSaver {
                         "gameName varchar(255)," +
                         "score int," +
                         "save varchar(255));",
+                //"CREATE INDEX IF NOT EXISTS `nameAndTime` ON `saves` ( `name`, `time` DESC )", there has to be an index here
                 "CREATE TABLE IF NOT EXISTS chats (" +
                         "time varchar(255), " +
                         "name varchar(255), " +
@@ -76,7 +77,7 @@ public class PlayerGameSaver implements GameSaver {
 
     @Override
     public PlayerSave loadGame(final String name) {
-        return pool.select("SELECT * FROM saves WHERE name = ? ORDER BY time DESC LIMIT 1;",
+        return pool.select("SELECT * FROM saves WHERE name = ? ORDER BY score DESC LIMIT 1;",
                 new Object[]{name},
                 new ObjectMapper<PlayerSave>() {
                     @Override
